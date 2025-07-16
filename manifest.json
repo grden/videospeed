@@ -15,17 +15,12 @@
     "storage",
     "activeTab"
   ],
-  "options_ui": {
-    "page": "src/ui/options/options.html",
-    "open_in_tab": true
-  },
   "action": {
     "default_icon": {
       "19": "src/assets/icons/icon19.png",
       "38": "src/assets/icons/icon38.png",
       "48": "src/assets/icons/icon48.png"
-    },
-    "default_popup": "src/ui/popup/popup.html"
+    }
   },
   "content_scripts": [
     {

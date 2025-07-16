@@ -21,7 +21,7 @@ class VideoController {
     // Add to tracked media elements
     config.addMediaElement(target);
 
-    // Initialize speed
+    // Initialize speed asynchronously
     this.initializeSpeed();
 
     // Create UI
@@ -44,7 +44,7 @@ class VideoController {
    * @private
    */
   initializeSpeed() {
-    let targetSpeed = 1.0; // Default speed
+    let targetSpeed = 1.0;
 
     // Check if we should use per-video stored speeds
     const videoSrc = this.video.currentSrc || this.video.src;
@@ -62,8 +62,12 @@ class VideoController {
       // Reset speed isn't really a reset, it's a toggle to stored speed
       this.config.setKeyBinding('reset', targetSpeed);
     } else {
-      window.VSC.logger.debug('rememberSpeed disabled - using 1.0x speed');
-      targetSpeed = 1.0;
+      // When rememberSpeed is disabled, use random speed instead of 1.0
+      const presetSpeeds = [1.0, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3];
+      const randomIndex = Math.floor(Math.random() * presetSpeeds.length);
+      targetSpeed = presetSpeeds[randomIndex];
+
+      window.VSC.logger.debug(`Random speed selected: ${targetSpeed}`);
       // Reset speed toggles to fast speed when rememberSpeed is disabled
       this.config.setKeyBinding('reset', this.config.getKeyBinding('fast'));
     }
@@ -81,7 +85,54 @@ class VideoController {
         })
       );
     } else {
-      this.video.playbackRate = targetSpeed;
+      // Set the speed immediately and also set up event listeners for when video loads
+      this.setVideoSpeed(targetSpeed);
+
+      // Also set up listeners to ensure speed is applied when video becomes ready
+      this.setupSpeedListeners(targetSpeed);
+    }
+  }
+
+  /**
+   * Set video speed with error handling
+   * @param {number} speed - Target playback speed
+   * @private
+   */
+  setVideoSpeed(speed) {
+    try {
+      this.video.playbackRate = speed;
+      window.VSC.logger.debug(`Set video playback rate to: ${speed}x`);
+    } catch (error) {
+      window.VSC.logger.debug(`Failed to set playback rate immediately: ${error.message}`);
+    }
+  }
+
+  /**
+   * Set up event listeners to ensure speed is applied when video becomes ready
+   * @param {number} targetSpeed - Target playback speed
+   * @private
+   */
+  setupSpeedListeners(targetSpeed) {
+    const applySpeed = () => {
+      this.setVideoSpeed(targetSpeed);
+    };
+
+    // Store the target speed for later use
+    this.targetSpeed = targetSpeed;
+
+    // Apply speed when video metadata loads
+    if (this.video.readyState < 1) {
+      this.video.addEventListener('loadedmetadata', applySpeed, { once: true });
+    }
+
+    // Apply speed when video data loads
+    if (this.video.readyState < 2) {
+      this.video.addEventListener('loadeddata', applySpeed, { once: true });
+    }
+
+    // Apply speed when video can start playing
+    if (this.video.readyState < 3) {
+      this.video.addEventListener('canplay', applySpeed, { once: true });
     }
   }
 
@@ -203,11 +254,18 @@ class VideoController {
       this.actionHandler.setSpeed(event.target, storedSpeed);
     };
 
+    // Handle new video loading
+    const handleNewVideo = () => {
+      this.applyNewRandomSpeed();
+    };
+
     this.handlePlay = mediaEventAction.bind(this);
     this.handleSeek = mediaEventAction.bind(this);
+    this.handleLoadStart = handleNewVideo.bind(this);
 
     this.video.addEventListener('play', this.handlePlay);
     this.video.addEventListener('seeked', this.handleSeek);
+    this.video.addEventListener('loadstart', this.handleLoadStart);
   }
 
   /**
@@ -227,6 +285,8 @@ class VideoController {
             controller.classList.add('vsc-nosource');
           } else {
             controller.classList.remove('vsc-nosource');
+            // Apply new random speed when source changes
+            this.applyNewRandomSpeed();
           }
         }
       });
@@ -235,6 +295,22 @@ class VideoController {
     this.targetObserver.observe(this.video, {
       attributeFilter: ['src', 'currentSrc'],
     });
+  }
+
+  /**
+   * Apply new random speed (for when video source changes)
+   * @private
+   */
+  applyNewRandomSpeed() {
+    // Only apply random speed if rememberSpeed is disabled
+    if (!this.config.settings.rememberSpeed) {
+      const presetSpeeds = [1.0, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3];
+      const randomIndex = Math.floor(Math.random() * presetSpeeds.length);
+      const targetSpeed = presetSpeeds[randomIndex];
+
+      this.setVideoSpeed(targetSpeed);
+      this.setupSpeedListeners(targetSpeed);
+    }
   }
 
   /**
@@ -254,6 +330,9 @@ class VideoController {
     }
     if (this.handleSeek) {
       this.video.removeEventListener('seeked', this.handleSeek);
+    }
+    if (this.handleLoadStart) {
+      this.video.removeEventListener('loadstart', this.handleLoadStart);
     }
 
     // Disconnect mutation observer

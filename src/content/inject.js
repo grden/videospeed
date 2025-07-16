@@ -59,6 +59,9 @@ class VideoSpeedExtension {
       // Set up observers
       this.setupObservers();
 
+      // Initialize response receiver UI for YouTube
+      this.setupResponseReceiver();
+
       // Initialize when document is ready
       this.initializeWhenReady(document, (doc) => {
         this.initializeDocument(doc);
@@ -68,8 +71,8 @@ class VideoSpeedExtension {
       this.initialized = true;
     } catch (error) {
       console.error(`❌ Failed to initialize Video Speed Controller: ${error.message}`);
-      console.error('📋 Full error details:', error);
-      console.error('🔍 Error stack:', error.stack);
+      console.error('Full error details:', error);
+      console.error('Error stack:', error.stack);
     }
   }
 
@@ -129,6 +132,24 @@ class VideoSpeedExtension {
   }
 
   /**
+   * Set up response receiver UI for research
+   */
+  setupResponseReceiver() {
+    try {
+      // Only initialize on YouTube
+      if (window.location.hostname.includes('youtube.com')) {
+        window.VSC.logger.info('Setting up ResponseReceiver...');
+        this.responseReceiver = new window.VSC.ResponseReceiver();
+        window.VSC.logger.info('✅ Response receiver UI initialized for YouTube');
+      } else {
+        window.VSC.logger.info('❌ Not YouTube, skipping response receiver UI');
+      }
+    } catch (error) {
+      window.VSC.logger.error('Error setting up response receiver UI:', error);
+    }
+  }
+
+  /**
    * Handle newly found video element
    * @param {HTMLMediaElement} video - Video element
    * @param {HTMLElement} parent - Parent element
@@ -148,7 +169,7 @@ class VideoSpeedExtension {
       this.logger.debug('Attaching controller to new video element');
       video.vsc = new this.VideoController(video, parent, this.config, this.actionHandler);
     } catch (error) {
-      console.error('💥 Failed to attach controller to video:', error);
+      console.error('Failed to attach controller to video:', error);
       this.logger.error(`Failed to attach controller to video: ${error.message}`);
     }
   }
