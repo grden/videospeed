@@ -26,15 +26,9 @@
     {
       "all_frames": true,
       "matches": [
-        "http://*/*",
-        "https://*/*",
-        "file:///*"
+        "*://*.youtube.com/*"
       ],
       "match_about_blank": true,
-      "exclude_matches": [
-        "https://hangouts.google.com/*",
-        "https://meet.google.com/*"
-      ],
       "css": [
         "src/styles/inject.css"
       ],
@@ -57,9 +51,7 @@
         "src/content/*.js"
       ],
       "matches": [
-        "http://*/*",
-        "https://*/*",
-        "file:///*"
+        "*://*.youtube.com/*"
       ]
     }
   ]
