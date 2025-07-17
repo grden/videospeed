@@ -8,6 +8,12 @@ function injectScript(src) {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = chrome.runtime.getURL(src);
+
+    // Firebase must be loaded as a module
+    if (src.includes('firebase')) {
+      script.type = 'module';
+    }
+
     script.onload = () => {
       resolve();
     };
@@ -37,6 +43,7 @@ async function injectModules() {
     const modules = [
       'src/utils/constants.js',
       'src/utils/logger.js',
+      'src/core/firebase.js',
       'src/utils/dom-utils.js',
       'src/utils/event-manager.js',
       'src/core/storage-manager.js',

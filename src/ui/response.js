@@ -346,24 +346,16 @@ class ResponseReceiver {
    * Send data to server (placeholder - replace with actual endpoint)
    */
   async sendToServer(data) {
-    // For now, just log the data that would be sent
-    console.log('Response Data:', data);
-
-    // TODO: Replace with actual server endpoint
-    // const response = await fetch('/api/response', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify(data)
-    // });
-    //
-    // if (!response.ok) {
-    //   throw new Error('Server error');
-    // }
-
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    if (window.VSC && window.VSC.firebase) {
+      await window.VSC.firebase.logResponse(data);
+    } else {
+      console.error('VSC: Firebase module not found. Cannot log response.');
+      // Fallback or error handling
+      // For now, just log the data that would be sent
+      console.log('Response Data (fallback):', data);
+      // Simulate network delay
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
   }
 }
 
