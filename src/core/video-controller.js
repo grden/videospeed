@@ -32,6 +32,9 @@ class VideoController {
     // Set up event handlers
     this.setupEventHandlers();
 
+    // Ensure manualEdit starts as false after initialization
+    this.manualEdit = false;
+
     // Set up mutation observer for src changes
     this.setupMutationObserver();
 
@@ -289,7 +292,7 @@ class VideoController {
           (mutation.attributeName === 'src' || mutation.attributeName === 'currentSrc')
         ) {
           window.VSC.logger.debug('mutation of A/V element');
-                    const controller = this.div;
+          const controller = this.div;
           if (!mutation.target.src && !mutation.target.currentSrc) {
             controller.classList.add('vsc-nosource');
           } else {
@@ -329,6 +332,11 @@ class VideoController {
    */
   remove() {
     window.VSC.logger.debug('Removing VideoController');
+
+    // Remove DOM element
+    if (this.div && this.div.parentElement) {
+      this.div.remove();
+    }
 
     // Remove event listeners
     if (this.handlePlay) {
