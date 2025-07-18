@@ -211,12 +211,14 @@ class ActionHandler {
           detail: { origin: 'videoSpeed', speed: speedValue },
         })
       );
-    } else {
-      video.playbackRate = numericSpeed;
     }
 
-    const speedIndicator = video.vsc.speedIndicator;
-    speedIndicator.textContent = numericSpeed.toFixed(2);
+    if (video.vsc) {
+      const speedIndicator = video.vsc.speedIndicator;
+      if (speedIndicator) {
+        speedIndicator.textContent = numericSpeed.toFixed(2);
+      }
+    }
 
     // Update settings
     this.config.settings.lastSpeed = numericSpeed;
