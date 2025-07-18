@@ -32,7 +32,7 @@ const DEFAULT_SETTINGS = {
   rememberSpeed: false, // default: false
   forceLastSavedSpeed: false, //default: false
   audioBoolean: false, // default: false
-  startHidden: false, // default: false
+  startHidden: true, // default: true
   controllerOpacity: 0.3, // default: 0.3
   controllerButtonSize: 14,
   keyBindings: [],

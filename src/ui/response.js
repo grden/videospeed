@@ -328,6 +328,7 @@ class ResponseReceiver {
     const video = document.querySelector('video');
     const currentTime = video ? video.currentTime : 0;
     const playbackRate = video ? video.playbackRate : 1.0;
+    const manualEdit = video && video.vsc ? video.vsc.manualEdit : false;
 
     const minutes = Math.floor(currentTime / 60);
     const seconds = Math.floor(currentTime % 60);
@@ -337,6 +338,7 @@ class ResponseReceiver {
       playbackRate: playbackRate,
       currentTime: `${minutes}:${seconds.toString().padStart(2, '0')}`,
       reason: reason,
+      manualEdit: manualEdit,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
     };

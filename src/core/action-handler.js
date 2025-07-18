@@ -195,6 +195,14 @@ class ActionHandler {
     const speedValue = speed.toFixed(2);
     const numericSpeed = Number(speedValue);
 
+    const event = new CustomEvent('ratechange', {
+      detail: {
+        origin: 'videoSpeed',
+        speed: numericSpeed,
+      },
+    });
+    video.dispatchEvent(event);
+
     if (this.config.settings.forceLastSavedSpeed) {
       video.dispatchEvent(
         new CustomEvent('ratechange', {

@@ -18,6 +18,8 @@ class VideoController {
     this.actionHandler = actionHandler;
     this.controlsManager = new window.VSC.ControlsManager(actionHandler, config);
 
+    this.manualEdit = false;
+
     // Add to tracked media elements
     config.addMediaElement(target);
 
@@ -76,14 +78,7 @@ class VideoController {
 
     // Apply the speed immediately if forceLastSavedSpeed is enabled
     if (this.config.settings.forceLastSavedSpeed && targetSpeed !== 1.0) {
-      window.VSC.logger.debug('forceLastSavedSpeed enabled - dispatching ratechange event');
-      this.video.dispatchEvent(
-        new CustomEvent('ratechange', {
-          bubbles: true,
-          composed: true,
-          detail: { origin: 'videoSpeed', speed: targetSpeed.toFixed(2) },
-        })
-      );
+      this.setVideoSpeed(targetSpeed);
     } else {
       // Set the speed immediately and also set up event listeners for when video loads
       this.setVideoSpeed(targetSpeed);
@@ -235,7 +230,12 @@ class VideoController {
    * @private
    */
   setupEventHandlers() {
+    this.video.addEventListener('ratechange', this.handleRateChange.bind(this), true);
     const mediaEventAction = (event) => {
+      // Reset manual edit flag when video starts playing or seeking begins
+      // This ensures we start fresh for each video session
+      this.manualEdit = false;
+
       let storedSpeed = this.config.settings.speeds[event.target.currentSrc];
 
       if (!this.config.settings.rememberSpeed) {
@@ -256,6 +256,7 @@ class VideoController {
 
     // Handle new video loading
     const handleNewVideo = () => {
+      this.manualEdit = false; // Reset manual edit flag for new video
       this.applyNewRandomSpeed();
     };
 
@@ -266,6 +267,14 @@ class VideoController {
     this.video.addEventListener('play', this.handlePlay);
     this.video.addEventListener('seeked', this.handleSeek);
     this.video.addEventListener('loadstart', this.handleLoadStart);
+  }
+
+  handleRateChange(event) {
+    if (event.detail && event.detail.origin === 'videoSpeed') {
+      this.manualEdit = false;
+    } else {
+      this.manualEdit = true;
+    }
   }
 
   /**
@@ -280,11 +289,13 @@ class VideoController {
           (mutation.attributeName === 'src' || mutation.attributeName === 'currentSrc')
         ) {
           window.VSC.logger.debug('mutation of A/V element');
-          const controller = this.div;
+                    const controller = this.div;
           if (!mutation.target.src && !mutation.target.currentSrc) {
             controller.classList.add('vsc-nosource');
           } else {
             controller.classList.remove('vsc-nosource');
+            // Reset manual edit flag when video source changes
+            this.manualEdit = false;
             // Apply new random speed when source changes
             this.applyNewRandomSpeed();
           }
@@ -318,11 +329,6 @@ class VideoController {
    */
   remove() {
     window.VSC.logger.debug('Removing VideoController');
-
-    // Remove DOM element
-    if (this.div && this.div.parentNode) {
-      this.div.remove();
-    }
 
     // Remove event listeners
     if (this.handlePlay) {
