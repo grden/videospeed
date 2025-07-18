@@ -11,7 +11,7 @@ class DragHandler {
    * @param {HTMLVideoElement} video - Video element
    * @param {MouseEvent} e - Mouse event
    */
-    static handleDrag(video, e) {
+  static handleDrag(video, e) {
     const controller = video.vsc.div;
     const shadowController = controller.shadowRoot.querySelector('#controller');
 

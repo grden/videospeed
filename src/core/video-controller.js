@@ -19,6 +19,7 @@ class VideoController {
     this.controlsManager = new window.VSC.ControlsManager(actionHandler, config);
 
     this.manualEdit = false;
+    this.ignoreNextRateChange = false;
 
     // Add to tracked media elements
     config.addMediaElement(target);
@@ -28,6 +29,9 @@ class VideoController {
 
     // Create UI
     this.div = this.initializeControls();
+
+    // Hide controller by default as requested
+    this.hideController();
 
     // Set up event handlers
     this.setupEventHandlers();
@@ -95,7 +99,8 @@ class VideoController {
    */
   setVideoSpeed(speed) {
     try {
-      this.video.playbackRate = speed;
+      // Use action handler to properly set origin in ratechange event
+      this.actionHandler.setSpeed(this.video, speed);
       window.VSC.logger.debug(`Set video playback rate to: ${speed}x`);
     } catch (error) {
       window.VSC.logger.debug(`Failed to set playback rate immediately: ${error.message}`);
@@ -272,6 +277,7 @@ class VideoController {
   handleRateChange(event) {
     if (event.detail && event.detail.origin === 'videoSpeed') {
       this.manualEdit = false;
+      this.video.playbackRate = event.detail.speed;
     } else {
       this.manualEdit = true;
     }
@@ -289,7 +295,7 @@ class VideoController {
           (mutation.attributeName === 'src' || mutation.attributeName === 'currentSrc')
         ) {
           window.VSC.logger.debug('mutation of A/V element');
-                    const controller = this.div;
+          const controller = this.div;
           if (!mutation.target.src && !mutation.target.currentSrc) {
             controller.classList.add('vsc-nosource');
           } else {
@@ -325,10 +331,52 @@ class VideoController {
   }
 
   /**
+   * Hide the controller UI while keeping all functionality intact
+   * @private
+   */
+  hideController() {
+    if (this.div) {
+      // Use CSS to completely hide the controller
+      this.div.style.display = 'none';
+      this.div.style.visibility = 'hidden';
+      this.div.style.opacity = '0';
+
+      // Also add the hidden class for consistency
+      this.div.classList.add('vsc-hidden');
+
+      window.VSC.logger.debug('Controller UI hidden while maintaining functionality');
+    }
+  }
+
+  /**
+   * Show the controller UI
+   * @private
+   */
+  showController() {
+    if (this.div) {
+      // Restore visibility
+      this.div.style.display = '';
+      this.div.style.visibility = '';
+      this.div.style.opacity = '';
+
+      // Remove hidden class
+      this.div.classList.remove('vsc-hidden');
+      this.div.classList.add('vcs-show');
+
+      window.VSC.logger.debug('Controller UI shown');
+    }
+  }
+
+  /**
    * Remove controller and clean up
    */
   remove() {
     window.VSC.logger.debug('Removing VideoController');
+
+    // Remove DOM element
+    if (this.div && this.div.parentElement) {
+      this.div.remove();
+    }
 
     // Remove event listeners
     if (this.handlePlay) {
