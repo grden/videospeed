@@ -68,18 +68,45 @@ class ResponseReceiver {
       width: 100%;
       padding: 8px 12px;
       border: 1px solid #ddd;
-      border-radius: 4px;
+      border-radius: 8px;
       margin-bottom: 12px;
       box-sizing: border-box;
       font-size: 14px;
     `;
 
+    // Checkbox
+    this.isDetectedCheckbox = document.createElement('input');
+    this.isDetectedCheckbox.type = 'checkbox';
+    this.isDetectedCheckbox.id = 'vsc-is-detected-checkbox';
+    this.isDetectedCheckbox.style.cssText = `
+      width: 20px;
+      height: 20px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    `;
+
+    // Checkbox label
+    const checkboxLabel = document.createElement('label');
+    checkboxLabel.htmlFor = 'vsc-is-detected-checkbox';
+    checkboxLabel.textContent = '감지하지 못함';
+    checkboxLabel.style.cssText = `
+      color: #606060;
+      display: flex;
+      align-items: center;
+    `;
+    // Wrap checkbox and label
+    const checkboxWrapper = document.createElement('div');
+    checkboxWrapper.style.cssText =
+      'margin-bottom: 10px; display: flex; align-items: center; gap: 4px;';
+    checkboxWrapper.appendChild(this.isDetectedCheckbox);
+    checkboxWrapper.appendChild(checkboxLabel);
+
     // Button container
     this.buttonContainer = document.createElement('div');
     this.buttonContainer.style.cssText = `
       display: flex;
-      gap: 8px;
-      justify-content: flex-end;
+      justify-content: space-between;
+      align-items: start;
     `;
 
     // Submit button
@@ -99,6 +126,14 @@ class ResponseReceiver {
     // Event listeners
     submitButton.addEventListener('click', () => this.submitDetection());
     this.reasonInputField.addEventListener('focus', () => this.pauseVideo());
+    this.isDetectedCheckbox.addEventListener('change', () => {
+      if (this.isDetectedCheckbox.checked) {
+        this.reasonInputField.value = '';
+        this.reasonInputField.disabled = true;
+      } else {
+        this.reasonInputField.disabled = false;
+      }
+    });
 
     // Enter key support
     this.reasonInputField.addEventListener('keypress', (e) => {
@@ -119,6 +154,7 @@ class ResponseReceiver {
     `;
 
     // Assemble UI
+    this.buttonContainer.appendChild(checkboxWrapper);
     this.buttonContainer.appendChild(submitButton);
 
     this.MainContainer.appendChild(title);
@@ -296,7 +332,7 @@ class ResponseReceiver {
   async submitDetection() {
     const reason = this.reasonInputField.value.trim();
 
-    if (!reason) {
+    if (!reason && !this.isDetectedCheckbox.checked) {
       this.showMessage('이유를 입력해주세요.', 'error');
       return;
     }
@@ -336,6 +372,7 @@ class ResponseReceiver {
       videoUrl: window.location.href,
       playbackRate: playbackRate,
       currentTime: `${minutes}:${seconds.toString().padStart(2, '0')}`,
+      isDetected: !this.isDetectedCheckbox.checked, // false if checked (오탐지), true if not checked
       reason: reason,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
