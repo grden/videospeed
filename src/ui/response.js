@@ -53,7 +53,8 @@ class ResponseReceiver {
 
     // Description
     const description = document.createElement('div');
-    description.textContent = '어떻게 알아차리셨는지 간단히 알려주세요.';
+    description.textContent =
+      '어떻게 알아차리셨는지 간단히 알려주세요. 만약 감지하지 못했을 경우, 페이지를 나가기 전 체크박스를 체크한 후 제출 버튼을 눌러주세요.';
     description.style.cssText = `
       margin-bottom: 12px;
       color: #606060;
