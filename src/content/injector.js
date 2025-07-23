@@ -100,6 +100,20 @@ async function injectSiteSpecificScripts() {
   }
 }
 
+// Inject user settings from chrome.storage into page context
+function injectUserSettings() {
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
+    chrome.storage.sync.get(null, (settings) => {
+      // settings 객체를 커스텀 이벤트로 페이지에 전달
+      window.dispatchEvent(
+        new CustomEvent('VSC_USER_SETTINGS', {
+          detail: settings,
+        })
+      );
+    });
+  }
+}
+
 // Set up message bridge between extension popup and injected page
 function setupMessageBridge() {
   // Fetch and inject user settings into page context
@@ -138,27 +152,6 @@ function setupMessageBridge() {
       console.error('❌ Failed to save settings to Chrome storage:', error);
     }
   });
-}
-
-// Fetch user settings from Chrome storage and inject into page context
-async function injectUserSettings() {
-  try {
-    // Get user settings from Chrome storage (available in content script context)
-    const userSettings = await new Promise((resolve) => {
-      chrome.storage.sync.get(null, (settings) => {
-        resolve(settings);
-      });
-    });
-
-    // Inject settings into page context via custom event
-    window.dispatchEvent(
-      new CustomEvent('VSC_USER_SETTINGS', {
-        detail: userSettings,
-      })
-    );
-  } catch (error) {
-    console.error('❌ Failed to inject user settings:', error);
-  }
 }
 
 // Start injection when DOM is ready

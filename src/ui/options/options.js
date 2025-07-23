@@ -1,3 +1,5 @@
+// 기존 옵션 관련 코드 전체 주석 처리
+/*
 var regStrip = /^[\r\t\f\v ]+|[\r\t\f\v ]+$/gm;
 
 var tcDefaults = {
@@ -417,3 +419,35 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
+*/
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("save").addEventListener("click", save_id);
+});
+
+function validate_id() {
+  const id = document.getElementById("id").value.trim();
+  if (id.length < 2) {
+    document.getElementById("status").textContent = "이름을 2자 이상 입력해주세요.";
+    return false;
+  }
+  return true;
+}
+
+function save_id() {
+  if (!validate_id()) {
+    return;
+  }
+  const id = document.getElementById("id").value.trim();
+  chrome.storage.sync.set({
+    id: id
+  }, function () {
+    // Update status to let user know options were saved.
+    var status = document.getElementById("status");
+    status.textContent = "저장되었습니다!";
+    setTimeout(function () {
+      status.textContent = "";
+    }, 5000);
+  }
+  );
+}

@@ -341,7 +341,7 @@ class ResponseReceiver {
     // Show loading state
     this.showMessage('제출 중...', 'loading');
 
-    const detectionData = this.collectDetectionData(reason);
+    const detectionData = await this.collectDetectionData(reason);
 
     try {
       // Send data to server
@@ -361,7 +361,7 @@ class ResponseReceiver {
   /**
    * Collect detection data
    */
-  collectDetectionData(reason) {
+  async collectDetectionData(reason) {
     const video = document.querySelector('video');
     const currentTime = video ? video.currentTime : 0;
     const playbackRate = video ? video.playbackRate : 1.0;
@@ -369,7 +369,14 @@ class ResponseReceiver {
     const minutes = Math.floor(currentTime / 60);
     const seconds = Math.floor(currentTime % 60);
 
+    let id = '';
+    if (window.VSC && window.VSC.StorageManager) {
+      const settings = await window.VSC.StorageManager.get();
+      id = settings.id || '';
+    }
+
     return {
+      id: id,
       videoUrl: window.location.href,
       playbackRate: playbackRate,
       currentTime: `${minutes}:${seconds.toString().padStart(2, '0')}`,

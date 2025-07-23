@@ -42,10 +42,12 @@ body {
 h1,
 h2,
 h3 {
-  font-weight: normal;
   line-height: 1;
   user-select: none;
   cursor: default;
+  font-weight: bold;
+  color: #333;
+  font-size: 16px;
 }
 
 h1 {
@@ -55,11 +57,13 @@ h1 {
 
 h3 {
   font-size: 1.2em;
-  margin-bottom: 0.8em;
+  margin-bottom: 0.4em;
 }
 
 p {
-  margin: 0.65em 0;
+  margin: 0.8em 0;
+  color: #606060;
+  font-size: 14px;
 }
 
 header {
@@ -78,30 +82,23 @@ section {
   margin-bottom: 24px;
 }
 
-section h3 {
+/* section h3 {
   margin-left: -18px;
-}
+} */
 
 button {
-  -webkit-appearance: none;
-
-  margin: 0 1px 0 0;
-  padding: 0 10px;
-  min-width: 4em;
-  min-height: 2em;
-  background-color: var(--bg-shade);
-  border: 1px solid var(--color-shade);
-
-  border-radius: 2px;
-  outline: none;
-  color: var(--main-color);
-  font: inherit;
-
-  user-select: none;
+  background: #1976d2;
+  color: white;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 button:hover {
-  background-color: var(--color-shade);
+  /* background-color: var(--color-shade); */
   cursor: pointer;
 }
 
@@ -117,11 +114,13 @@ button:disabled:hover {
 }
 
 input[type="text"] {
-  width: 75px;
-  text-align: center;
-  border: 1px solid var(--color-shade);
-  background-color: var(--bg-shade);
-  color: var(--main-color);
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 0.6em;
+  box-sizing: border-box;
+  font-size: 14px;
 }
 
 input::placeholder {
@@ -154,9 +153,10 @@ label {
 }
 
 #status {
-  color: var(--main-color);
+  color: #606060;
   display: inline-block;
-  margin-left: 50px;
+  margin-left: 8px;
+  font-size: 14px;
 }
 
 #faq {

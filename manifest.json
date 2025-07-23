@@ -15,12 +15,16 @@
     "storage",
     "activeTab"
   ],
+  "options_page": "src/ui/options/options.html",
   "action": {
     "default_icon": {
       "19": "src/assets/icons/icon19.png",
       "38": "src/assets/icons/icon38.png",
       "48": "src/assets/icons/icon48.png"
     }
+  },
+  "background": {
+    "service_worker": "src/background/background.js"
   },
   "content_scripts": [
     {
